@@ -6,7 +6,7 @@ class Post < ApplicationRecord
 
   private
     def create_feed
-      CreateFeedForUserJob.perform_async(creator_id, id)
+      CreateFeedForUserJob.new.perform(creator_id, id)
     end
 
 end
