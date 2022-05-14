@@ -6,7 +6,8 @@ if [ -f tmp/pids/server.pid ]; then
     rm tmp/pids/server.pid
 fi
 
+rails db:create
 rails db:migrate
 rails db:seed
 
-exec "$@"
+rails s -b 0.0.0.0
