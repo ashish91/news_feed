@@ -2,24 +2,49 @@ version: '3.8'
 
 services:
   db:
-    image: postgres
+    image: postgres:14.2-alpine
     ports:
       - 5432:5432
     volumes:
-      - ./tmp/db:/var/lib/postgresql/data
+      - ./tmp/postgres:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: password
-  web:
-    image: ashishp91/news_feed:latest
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
-    volumes:
-      - .:/myapp
-    environment:
-      - DBHOST=postgresql
-      - DBUSER=postgres
-      - DBPASS=password
-      - RAILS_ENV=development
+  redis:
+    image: redis:7-alpine
+    command: redis-server
     ports:
-      - 3000:3000
+      - 6379:6379
+    volumes:
+      - ./tmp/redis:/var/lib/redis
+  sidekiq:
+    build: .
+    depends_on:
+      - redis
+      - db
+    command: bundle exec sidekiq
+    volumes:
+      - .:/app
+      - /app/tmp
+    environment:
+      - DATABASE_HOST=db
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+  web:
+    build: .
     depends_on:
       - db
+      - sidekiq
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/app
+      - /app/tmp
+    environment:
+      - DATABASE_HOST=db
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - 3000:3000
+
+volumes:
+  redis:
+  postgres:

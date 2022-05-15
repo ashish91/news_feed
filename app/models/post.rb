@@ -8,7 +8,7 @@ class Post < ApplicationRecord
       # For celebrity the feed is generated when
       # the user fetches the feed
       if !creator.celebrity?
-        CreateFeedForPostJob.new.perform(creator_id, id)
+        CreateFeedForPostJob.perform_async(creator_id, id)
       end
     end
 end

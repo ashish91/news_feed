@@ -7,7 +7,7 @@ class Friendship < ApplicationRecord
 
   private
     def create_feed_for_friend
-      CreateFeedForFriendJob.new.perform(user_id, friend_id)
+      CreateFeedForFriendJob.perform_async(user_id, friend_id)
     end
 
     def increment_friend_count

@@ -4,12 +4,12 @@ WORKDIR /app
 
 COPY Gemfile /app/Gemfile
 COPY Gemfile.lock /app/Gemfile.lock
-RUN bundle install
+RUN bundle install --no-binstubs --jobs $(nproc) --retry 3
 
 COPY . .
 
-COPY entrypoint.sh /usr/bin/
-RUN chmod +x /usr/bin/entrypoint.sh
-EXPOSE 3000
+# COPY entrypoint.sh /usr/bin/
+# RUN chmod +x /usr/bin/entrypoint.sh
+# EXPOSE 3000
 
-CMD /usr/bin/entrypoint.sh
+# CMD /usr/bin/entrypoint.sh
